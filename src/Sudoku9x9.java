@@ -30,5 +30,4 @@ public class Sudoku9x9 {
         che torna una copia della matrice attuale dentro il sudoku
         ATTENZIONE deve essere un oggetto nuovo, non la matrice interna al sudoku
     */
-
 }

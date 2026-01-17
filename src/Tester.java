@@ -1,8 +1,8 @@
-
 public class Tester {
 
     public static void main(String[] args) throws Exception {
         assertEquals(() -> 2, 3, "errore", new String[]{"5"});
+        assertArrayEquals(() -> new Integer[]{1,2,3}, new Integer[]{1,1,3}, "test array");
         assertThrows(() -> {}, new Exception(), "no errore");
         assertNotThorws(() -> {throw new IllegalArgumentException();}, "errore");
         runAndPrintAll();
@@ -23,6 +23,15 @@ public class Tester {
     }
 
     @SuppressWarnings("unused")
+    private static void assertArrayEquals(java.util.function.Supplier<Object[]> function, Object[] output, String description){
+        assertArrayEquals(function, output, description, new String[0]);
+    }
+
+    private static void assertArrayEquals(java.util.function.Supplier<Object[]> function, Object[] output, String description, String[] input){
+        testList.add(new Tester(description, function, input, output));
+    }
+
+    @SuppressWarnings("unused")
     private static void assertEquals(java.util.function.Supplier<Object> function, Object output, String description){
         assertEquals(function, output, description, new String[0]);
     }
@@ -39,14 +48,27 @@ public class Tester {
 
     private final String description;
     private final java.util.function.Supplier<Object> function;
+    private final java.util.function.Supplier<Object[]> functionArray;
     private final String[] input;
     private final Object output;
+    private final Object[] outputArray;
+
+    public Tester(String description, java.util.function.Supplier<Object[]> function, String[] input, Object[] output) {
+        this.description = description;
+        this.functionArray = function;
+        this.function = null;
+        this.output = null;
+        this.input = input;
+        this.outputArray = output;
+    }
 
     public Tester(String description, java.util.function.Supplier<Object> function, String[] input, Object output) {
         this.description = description;
         this.function = function;
         this.input = input;
         this.output = output;
+        this.outputArray = null;
+        this.functionArray = null;
     }
 
     public Tester(String description, Runnable function, String[] input) {
@@ -58,9 +80,28 @@ public class Tester {
         this.function = () -> { function.run(); return 0; };
         this.input = new String[0];
         this.output = expectedException;
+        this.outputArray = null;
+        this.functionArray = null;
     }
 
-    public TestResult run() {
+    public TestResult run(){
+        return function == null ? runArray() : runSingle();
+    }
+
+    public TestResult runArray() {
+        try {
+            Object[] out = functionArray.get();
+            return outputArray == out || java.util.Arrays.deepEquals(out, outputArray) ? success() : failure(formatCall() + formatArray(out) + " != " + formatArray(outputArray));
+        } catch (Exception e) {
+            return error(e);
+        }
+    }
+
+    public String formatArray(Object[] a){
+        return "[" + String.join(", ", java.util.Arrays.asList(a).stream().map(x -> x.toString()).toList()) + "]";
+    }
+
+    public TestResult runSingle() {
         try {
             Object out = function.get();
             if (isExpectingException()) {

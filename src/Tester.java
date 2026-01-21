@@ -1,12 +1,124 @@
 public class Tester {
 
     public static void main(String[] args) throws Exception {
-        assertEquals(() -> 2, 3, "errore", new String[]{"5"});
-        assertArrayEquals(() -> new Integer[]{1,2,3}, new Integer[]{1,1,3}, "test array");
-        assertThrows(() -> {}, new Exception(), "no errore");
-        assertNotThorws(() -> {throw new IllegalArgumentException();}, "errore");
+
+        assertEquals(() -> new StringArrayList().size(), 0, "size iniziale = 0");
+        assertArrayEquals(() -> new StringArrayList().toArray(), new String[]{}, "toArray iniziale vuoto");
+        assertEquals(() -> new StringArrayList().get(0), null, "get(0) su lista vuota -> null");
+        assertEquals(() -> new StringArrayList().get(-1), null, "get(-1) su lista vuota -> null");
+
+        StringArrayList l1 = new StringArrayList();
+        assertEquals(() -> { l1.addLast("a"); return l1.size(); }, 1, "addLast 1 elemento incrementa size");
+        assertEquals(() -> l1.get(0), "a", "get(0) dopo addLast");
+        assertEquals(() -> l1.get(1), null, "get fuori range dopo addLast -> null");
+
+        assertEquals(() -> { l1.addLast("b"); return l1.size(); }, 2, "addLast 2° elemento incrementa size");
+        assertEquals(() -> l1.get(0), "a", "ordine preservato (0)");
+        assertEquals(() -> l1.get(1), "b", "ordine preservato (1)");
+
+        assertEquals(() -> { l1.addLast("c"); return l1.size(); }, 3, "addLast 3° elemento incrementa size");
+        assertEquals(() -> l1.get(2), "c", "get(2) dopo addLast");
+
+        StringArrayList l2 = new StringArrayList();
+        assertEquals(() -> { l2.addLast(null); return l2.size(); }, 1, "addLast(null) incrementa size");
+        assertEquals(() -> l2.get(0), null, "get(0) dopo addLast(null) -> null");
+        assertArrayEquals(() -> l2.toArray(), new String[]{null}, "toArray contiene null aggiunto");
+
+        StringArrayList l3 = new StringArrayList();
+        l3.addLast("x");
+        l3.addLast("y");
+        l3.addLast("z");
+        assertEquals(() -> { l3.removeAt(1); return l3.size(); }, 3, "removeAt non cambia size");
+        assertEquals(() -> l3.get(1), null, "removeAt imposta null");
+        assertEquals(() -> l3.get(0), "x", "removeAt non sposta (0 invariato)");
+        assertEquals(() -> l3.get(2), "z", "removeAt non sposta (2 invariato)");
+        assertArrayEquals(() -> l3.toArray(), new String[]{"x", null, "z"}, "toArray mostra buco dopo removeAt");
+
+        assertNotThorws(() -> l3.removeAt(-1), "removeAt(-1) non lancia eccezioni");
+        assertNotThorws(() -> l3.removeAt(3), "removeAt(size) non lancia eccezioni");
+
+        StringArrayList l4 = new StringArrayList();
+        l4.addLast("a");
+        l4.addLast("b");
+        l4.addLast("a");
+        l4.addLast("c");
+        assertEquals(() -> { l4.removeFirst("a"); return l4.size(); }, 4, "removeFirst non cambia size");
+        assertArrayEquals(() -> l4.toArray(), new String[]{null, "b", "a", "c"}, "removeFirst rimuove prima occorrenza");
+        assertEquals(() -> l4.get(2), "a", "seconda occorrenza resta");
+
+        StringArrayList l5 = new StringArrayList();
+        l5.addLast("a");
+        l5.addLast("b");
+        assertEquals(() -> { l5.removeFirst("x"); return 0; }, 0, "removeFirst su assente non cambia nulla");
+        assertArrayEquals(() -> l5.toArray(), new String[]{"a", "b"}, "removeFirst su assente lascia invariato");
+
+        StringArrayList l6 = new StringArrayList();
+        l6.addLast("a");
+        l6.addLast(null);
+        l6.addLast("b");
+        assertNotThorws(() -> l6.removeFirst(null), "removeFirst(null) non lancia eccezioni");
+        assertArrayEquals(() -> l6.toArray(), new String[]{"a", null, "b"}, "removeFirst(null) non rimuove (implementazione usa equals)");
+
+        StringArrayList l7 = new StringArrayList();
+        l7.addLast("a");
+        l7.addLast("b");
+        l7.addLast("c");
+        l7.removeAt(1);
+        l7.addLast("d"); 
+        l7.removeFirst("a");
+        assertArrayEquals(() -> l7.toArray(), new String[]{null, null, "c", "d"}, "stato prima di compact");
+        assertEquals(() -> { l7.compact(); return l7.size(); }, 2, "compact riduce size eliminando null");
+        assertArrayEquals(() -> l7.toArray(), new String[]{"c", "d"}, "compact preserva ordine e rimuove null");
+
+        StringArrayList l8 = new StringArrayList();
+        l8.addLast("x");
+        l8.addLast("y");
+        assertEquals(() -> { l8.compact(); return l8.size(); }, 2, "compact senza null non cambia size");
+        assertArrayEquals(() -> l8.toArray(), new String[]{"x", "y"}, "compact senza null non cambia contenuto");
+
+        StringArrayList l9 = new StringArrayList();
+        l9.addLast("x");
+        l9.addLast("y");
+        l9.removeAt(0);
+        l9.removeAt(1);
+        assertArrayEquals(() -> l9.toArray(), new String[]{null, null}, "tutti null prima di compact");
+        assertEquals(() -> { l9.compact(); return l9.size(); }, 0, "compact su tutti null -> size 0");
+        assertArrayEquals(() -> l9.toArray(), new String[]{}, "compact su tutti null -> array vuoto");
+
+        StringArrayList l10 = new StringArrayList();
+        l10.addLast("a");
+        l10.addLast("b");
+        String[] arr = l10.toArray();
+        arr[0] = "X";
+        assertEquals(() -> l10.get(0), "a", "toArray restituisce copia: modifiche esterne non cambiano la lista");
+        assertArrayEquals(() -> l10.toArray(), new String[]{"a", "b"}, "contenuto invariato dopo modifica su copia");
+
+        StringArrayList l11 = new StringArrayList();
+        l11.addLast("a");
+        l11.addLast("b");
+        l11.removeAt(0);
+        assertEquals(() -> { l11.clear(); return l11.size(); }, 0, "clear porta size a 0");
+        assertArrayEquals(() -> l11.toArray(), new String[]{}, "clear porta array a vuoto");
+        assertEquals(() -> l11.get(0), null, "get(0) dopo clear -> null");
+
+        StringArrayList l12 = new StringArrayList();
+        int n = 200;
+        for (int i = 0; i < n; i++) l12.addLast("v" + i);
+        assertEquals(() -> l12.size(), n, "aggiunta di molti elementi -> size corretta");
+        assertEquals(() -> l12.get(0), "v0", "stress: primo elemento");
+        assertEquals(() -> l12.get(n - 1), "v" + (n - 1), "stress: ultimo elemento");
+
+        StringArrayList l13 = new StringArrayList();
+        for (int i = 0; i < n; i++) l13.addLast("v" + i);
+        for (int i = 0; i < n; i += 3) l13.removeAt(i);
+        assertEquals(() -> l13.size(), n, "dopo removeAt ripetuti size invariata");
+        assertNotThorws(() -> l13.compact(), "compact dopo molte rimozioni non lancia eccezioni");
+        int expectedAfterCompact = n - (int) Math.ceil(n / 3.0);
+        assertEquals(() -> l13.size(), expectedAfterCompact, "compact dopo rimozioni -> size attesa");
+
         runAndPrintAll();
     }
+
 
     @SuppressWarnings("unused")
     private static void assertNotThorws(Runnable function, String description){

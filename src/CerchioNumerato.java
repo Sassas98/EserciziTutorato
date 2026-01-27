@@ -1,7 +1,7 @@
 /*
     Implementa i metodi dell'interfaccia, in piu':
     1) la classe ha un solo costruttore che richiede x, y, raggio e numero. 
-        quest'ultimo non è un float, ma un long, ed è final.
+        quest'ultimo non è un float, ma un long.
         il raggio non può essere 0 o negativo, in quel caso lancia una IllegalArgumentException
     2) esponi le coordinate x e y con un solo setter che prende in input un Punto
     3) esponi il metodo void assorbi(CerchioNumerato c)
@@ -28,7 +28,7 @@
         l'indice segue l'ordine di inserimento.
         se, nella sua nuova posizione, il cerchio numerato è completamente contenuto da un altro cerchio, 
         va assorbito dal cerchio più grande e rimosso. si ricorda di fare spazio in modo ordinato.
-    5) esponi il metodo int[] daiNumeriOrdinati()
+    5) esponi il metodo long[] daiNumeriOrdinati()
         ritorna il numero personale di ciascun cerchio ordinati dal maggiore al minore.
     6) esponi il metodo CerchioNumerato sommaCerchi()
         questo ritorna un cerchio che, grazie alla posizione e al raggio, e' in grado di contenere tutti i cerchi presenti

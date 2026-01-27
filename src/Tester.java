@@ -1,12 +1,221 @@
 public class Tester {
 
     public static void main(String[] args) throws Exception {
-        assertEquals(() -> 2, 3, "errore", new String[]{"5"});
-        assertArrayEquals(() -> new Integer[]{1,2,3}, new Integer[]{1,1,3}, "test array");
-        assertThrows(() -> {}, new Exception(), "no errore");
-        assertNotThorws(() -> {throw new IllegalArgumentException();}, "errore");
+        // DECOMMENTA X TESTARE
+
+        /* 
+        assertEquals(() -> new PuntoFisso(3f, 4f).getX(), 3f, "PuntoFisso getX");
+        assertEquals(() -> new PuntoFisso(3f, 4f).getY(), 4f, "PuntoFisso getY");
+
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 5f, 10L).getX(), 0f, "CerchioNumerato getX");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 5f, 10L).getY(), 0f, "CerchioNumerato getY");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 5f, 10L).getRaggio(), 5f, "CerchioNumerato getRaggio");
+
+        assertThrows(() -> { new CerchioNumerato(0f, 0f, 0f, 1L); }, new IllegalArgumentException(), "Raggio zero");
+        assertThrows(() -> { new CerchioNumerato(0f, 0f, -1f, 1L); }, new IllegalArgumentException(), "Raggio negativo");
+
+        assertEquals(() -> new PuntoFisso(0f, 0f).distanza(new PuntoFisso(3f, 4f)), 5f, "Distanza 3-4-5");
+        assertEquals(() -> new PuntoFisso(1f, 1f).distanza(new PuntoFisso(1f, 1f)), 0f, "Distanza zero");
+        assertEquals(() -> new PuntoFisso(-1f, -1f).distanza(new PuntoFisso(2f, 3f)), 5f, "Distanza con negativi");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 1f, 1L).distanza(new CerchioNumerato(0f, 0f, 2f, 2L)), 0f, "Distanza tra cerchi stesso centro");
+
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 10f, 1L).contains(new CerchioNumerato(0f, 0f, 2f, 1L)), true, "Contains stesso centro");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 3f, 1L).contains(new CerchioNumerato(4f, 0f, 1f, 1L)), false, "Contains fuori");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 5f, 1L).contains(new CerchioNumerato(3f, 4f, 0.1f, 1L)), false, "Contains oltre il bordo di tolleranza");
+        assertEquals(() -> new CerchioNumerato(0f, 0f, 5f, 1L).contains(null), false, "Contains null");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(0f, 0f, 10f, 5L);
+            CerchioNumerato b = new CerchioNumerato(0f, 0f, 2f, 7L);
+            a.assorbi(b);
+            return b.getNumero();
+        }, 0L, "Assorbi azzera contenuto");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(0f, 0f, 10f, 5L);
+            CerchioNumerato b = new CerchioNumerato(0f, 0f, 2f, 7L);
+            a.assorbi(b);
+            return a.getNumero();
+        }, 12L, "Assorbi somma numeri");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(0f, 0f, 2f, 5L);
+            CerchioNumerato b = new CerchioNumerato(10f, 0f, 2f, 7L);
+            a.assorbi(b);
+            return b.getNumero();
+        }, 7L, "Assorbi non contenuto non azzera");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(0f, 0f, 10f, 5L);
+            CerchioNumerato b = new CerchioNumerato(0f, 0f, 2f, 0L);
+            a.assorbi(b);
+            return a.getNumero();
+        }, 5L, "Assorbi ignora numero 0");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(1f, 2f, 3f, 9L);
+            a.setPosizione(new PuntoFisso(7f, 8f));
+            return a.getX();
+        }, 7f, "Setter posizione aggiorna X");
+
+        assertEquals(() -> {
+            CerchioNumerato a = new CerchioNumerato(1f, 2f, 3f, 9L);
+            a.setPosizione(new PuntoFisso(7f, 8f));
+            return a.getY();
+        }, 8f, "Setter posizione aggiorna Y");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(0);
+            return p.capacita();
+        }, 1, "Costruttore max<=0 => 1");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            return p.capacita();
+        }, 2, "Capacita normale");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            return p.aggiungi(null);
+        }, false, "Aggiungi null");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            return p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 0L));
+        }, false, "Aggiungi numero 0");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            return p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 3L));
+        }, true, "Aggiungi ok");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(1);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 3L));
+            return p.aggiungi(new CerchioNumerato(2f, 0f, 1f, 4L));
+        }, false, "Aggiungi senza spazio");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 10f, 10L));
+            p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 5L));
+            return p.size();
+        }, 1, "Aggiungi assorbito e rimosso libera spazio");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 10f, 10L));
+            p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 5L));
+            return p.get(0).getNumero();
+        }, 15L, "Aggiungi: assorbimento somma");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(5);
+            p.aggiungi(new CerchioNumerato(0f, 1f, 2f, 1L));
+            p.aggiungi(new CerchioNumerato(5f, 0f, 1f, 2L));
+            p.aggiungi(new CerchioNumerato(1f, 0f, 1f, 3L));
+            return p.contaContenuti(new CerchioNumerato(0f, 0f, 3f, 9L));
+        }, 2, "Conta contenuti");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(5);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 1L));
+            p.aggiungi(new CerchioNumerato(5f, 0f, 1f, 2L));
+            return p.contaContenuti(null);
+        }, 0, "Conta contenuti con null");
+
+        assertNotThorws(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 1L));
+            p.sposta(-1, new PuntoFisso(1f, 1f));
+        }, "Sposta indice negativo non fa nulla");
+
+        assertNotThorws(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 1L));
+            p.sposta(0, null);
+        }, "Sposta punto null non fa nulla");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 1L));
+            p.sposta(0, new PuntoFisso(7f, 8f));
+            return p.get(0).getX();
+        }, 7f, "Sposta aggiorna X");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(2);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 1L));
+            p.sposta(0, new PuntoFisso(7f, 8f));
+            return p.get(0).getY();
+        }, 8f, "Sposta aggiorna Y");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(5);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 10f, 10L));
+            p.aggiungi(new CerchioNumerato(20f, 0f, 2f, 3L));
+            p.aggiungi(new CerchioNumerato(40f, 0f, 2f, 4L));
+            p.sposta(1, new PuntoFisso(0f, 0f));
+            return p.size();
+        }, 2, "Sposta dentro altro: rimosso");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(5);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 10f, 10L));
+            p.aggiungi(new CerchioNumerato(20f, 0f, 2f, 3L));
+            p.sposta(1, new PuntoFisso(0f, 0f));
+            return p.get(0).getNumero();
+        }, 13L, "Sposta dentro altro: assorbito somma");
+
+        assertArrayEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(5);
+            p.aggiungi(new CerchioNumerato(10f, 0f, 1f, 10L));
+            p.aggiungi(new CerchioNumerato(0f, 10f, 1f, 30L));
+            p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 20L));
+            int[] a = p.daiNumeriOrdinati();
+            return new Integer[]{a[0], a[1], a[2]};
+        }, new Integer[]{30, 20, 10}, "Numeri ordinati desc");
+
+        assertThrows(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.sommaCerchi();
+        }, new EmptyPlaneException(), "Somma cerchi su piano vuoto");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 5L));
+            p.aggiungi(new CerchioNumerato(10f, 0f, 1f, 7L));
+            CerchioNumerato s = p.sommaCerchi();
+            return s.getNumero();
+        }, 12L, "Somma cerchi: numero totale");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 5L));
+            p.aggiungi(new CerchioNumerato(10f, 0f, 1f, 7L));
+            p.sommaCerchi();
+            return p.size();
+        }, 0, "Somma cerchi svuota il piano");
+
+        assertEquals(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 2f, 5L));
+            p.aggiungi(new CerchioNumerato(10f, 0f, 1f, 7L));
+            CerchioNumerato s = p.sommaCerchi();
+            return s.contains(new CerchioNumerato(0f, 0f, 2f, 1L)) && s.contains(new CerchioNumerato(10f, 0f, 1f, 1L));
+        }, true, "Somma cerchi contiene tutti");
+
+        assertNotThorws(() -> {
+            PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(4);
+            p.aggiungi(new CerchioNumerato(0f, 0f, 5f, 1L));
+            p.aggiungi(new CerchioNumerato(12f, 0f, 5f, 2L));
+            CerchioNumerato s = p.sommaCerchi();
+            s.contains(new CerchioNumerato(6f, 0f, 1f, 1L));
+        }, "Somma cerchi non lancia in caso normale");
+        */
         runAndPrintAll();
     }
+
 
     @SuppressWarnings("unused")
     private static void assertNotThorws(Runnable function, String description){

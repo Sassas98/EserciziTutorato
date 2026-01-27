@@ -45,22 +45,45 @@
 
 public class CerchioNumerato implements Cerchio {
 
+    private float x, y, r;
+    private long n;
+
+    public CerchioNumerato(float x, float y, float r, long n){
+        if(r <= 0.0f) throw new IllegalArgumentException();
+        this.n = n;
+        this.r = r;
+        this.x = x;
+        this.y = y;
+    }
+
     @Override
     public float getX() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getX'");
+        return x;
     }
 
     @Override
     public float getY() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getY'");
+        return y;
     }
 
     @Override
     public float getRaggio() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRaggio'");
+        return r;
+    }
+
+    public long getNumero(){
+        return n;
+    }
+
+    public void setPosizione(Punto p){
+        this.x = p.getX();
+        this.y = p.getY();
     }
     
+    void assorbi(CerchioNumerato c){
+        if(c == null || c.getNumero() == 0 || !contains(c))
+            return;
+        n += c.n;
+        c.n = 0;
+    }
 }

@@ -3,7 +3,7 @@ public class Tester {
     public static void main(String[] args) throws Exception {
         // DECOMMENTA X TESTARE
 
-        /* 
+        
         assertEquals(() -> new PuntoFisso(3f, 4f).getX(), 3f, "PuntoFisso getX");
         assertEquals(() -> new PuntoFisso(3f, 4f).getY(), 4f, "PuntoFisso getY");
 
@@ -212,7 +212,7 @@ public class Tester {
             CerchioNumerato s = p.sommaCerchi();
             s.contains(new CerchioNumerato(6f, 0f, 1f, 1L));
         }, "Somma cerchi non lancia in caso normale");
-        */
+        
         runAndPrintAll();
     }
 

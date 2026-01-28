@@ -60,18 +60,17 @@ public class PianoDeiCerchiNumerati {
         }
     }
 
-    public int[] daiNumeriOrdinati() {
-        int[] out = new int[size];
-        for (int i = 0; i < size; i++) out[i] = (int) a[i].getNumero();
-
-        for (int i = 0; i < out.length; i++) {
-            int maxIdx = i;
-            for (int j = i + 1; j < out.length; j++) {
-                if (out[j] > out[maxIdx]) maxIdx = j;
+    public long[] daiNumeriOrdinati() {
+        long[] out = new long[size];
+        for (int i = 0; i < size; i++) {
+            out[i] = a[i].getNumero();
+            for (int j = i-1; j >= 0; j--) {
+                if (out[j] < out[j+1]) {
+                    long temp = out[j+1];
+                    out[j+1] = out[j];
+                    out[j] = temp;
+                }
             }
-            int tmp = out[i];
-            out[i] = out[maxIdx];
-            out[maxIdx] = tmp;
         }
         return out;
     }

@@ -172,9 +172,9 @@ public class Tester {
             p.aggiungi(new CerchioNumerato(10f, 0f, 1f, 10L));
             p.aggiungi(new CerchioNumerato(0f, 10f, 1f, 30L));
             p.aggiungi(new CerchioNumerato(0f, 0f, 1f, 20L));
-            int[] a = p.daiNumeriOrdinati();
-            return new Integer[]{a[0], a[1], a[2]};
-        }, new Integer[]{30, 20, 10}, "Numeri ordinati desc");
+            long[] a = p.daiNumeriOrdinati();
+            return new Long[]{a[0], a[1], a[2]};
+        }, new Long[]{30l, 20l, 10l}, "Numeri ordinati desc");
 
         assertThrows(() -> {
             PianoDeiCerchiNumerati p = new PianoDeiCerchiNumerati(3);

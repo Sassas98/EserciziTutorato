@@ -141,12 +141,72 @@ public class PianoDeiCerchiNumerati {
 
     private Cerchio controllaTutteLeDirezioni(Punto p, float start){
         Cerchio c = daiCerchio(p, start);
-        // TODO da finire
+        Punto[] directions = generaDirezioni();
+        for (int i = 0; i < directions.length; i++) {
+            p = controllaDirezione(c, directions[i]);
+            c = daiCerchio(p, restringi(p, c.getRaggio()));
+        }
         return c;
     }
 
-    private Punto moltiplica(Punto p1, Punto p2){
-        return new PuntoFisso(p1.getX()*p2.getX(), p1.getY()*p2.getY());
+    private Punto controllaDirezione(Cerchio c, Punto vector){
+        Punto base = c;
+        float mol = EPS;
+        Cerchio test = daiCerchio(somma(c, moltiplica(vector, mol)), c.getRaggio());
+        if(contieneTutti(test)){
+            float max = c.getRaggio(), min = 0, mid = EPS;
+            while(max-mid >= EPS){
+                test = daiCerchio(somma(c, moltiplica(vector, mid)), c.getRaggio());
+                if(contieneTutti(test)){
+                    mol = mid;
+                    min = mid;
+                    mid = (max+mid) / 2;
+                } else{
+                    max = mid;
+                    mid = (mid+min) / 2;
+                }
+            }
+            test = daiCerchio(somma(c, moltiplica(vector, mol)), c.getRaggio());
+            base = media(base, test);
+        }
+        return base;
+    }
+
+    private Punto[] generaDirezioni(){
+        float[][] directions = {
+            {1f, 0f}, {0.85f, 0.35f}, {0.7f, 0.7f}, 
+            {0.35f, 0.85f}, {0f, 1f}
+        };
+        float[][] result = new float[directions.length*4][2];
+        for (int i = 0; i < directions.length; i++) {
+            result[i] = directions[i];
+            result[i+directions.length] = new float[]{directions[i][1], -directions[i][0]};
+            result[i+2*directions.length] = new float[]{-directions[i][0], -directions[i][1]};
+            result[i+3*directions.length] = new float[]{-directions[i][1], directions[i][0]};
+        }
+        return generaDirezioni(result);
+    }
+
+    private Punto[] generaDirezioni(float[][] dirs){
+        Punto[] points = new Punto[dirs.length];
+        for (int i = 0; i < dirs.length; i++) {
+            points[i] = new PuntoFisso(dirs[i][0], dirs[i][1]);
+        }
+        return points;
+    }
+
+    private Punto media(Punto p1, Punto p2){
+        float x = (p1.getX() + p2.getX()) / 2;
+        float y = (p1.getY() + p2.getY()) / 2;
+        return new PuntoFisso(x, y);
+    }
+
+    private Punto somma(Punto p1, Punto p2){
+        return new PuntoFisso(p1.getX()+p2.getX(), p1.getY()+p2.getY());
+    }
+
+    private Punto moltiplica(Punto p1, float mol){
+        return new PuntoFisso(p1.getX()*mol, p1.getY()*mol);
     }
 
     private Cerchio daiCerchio(Punto p, float r){
@@ -163,13 +223,11 @@ public class PianoDeiCerchiNumerati {
 
     private Punto daiPuntoMedio(){
         float x = 0, y = 0;
-        if(size > 0){
-            for (int i = 0; i < size; i++) {
-                x += a[i].getX();
-                y += a[i].getY();
-            }
+        for (int i = 0; i < size; i++) {
+            x += a[i].getX();
+            y += a[i].getY();
         }
-        return new PuntoFisso(x/size, y/size);
+        return size > 0 ? new PuntoFisso(x/size, y/size) : new PuntoFisso(x, y);
     }
 
 }

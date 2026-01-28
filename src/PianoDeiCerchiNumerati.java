@@ -6,6 +6,8 @@ public class PianoDeiCerchiNumerati {
         if (max <= 0) max = 1;
         this.a = new CerchioNumerato[max];
         this.size = 0;
+        // inizializza le direzioni per sommaCerchi
+        this.directions = generaDirezioni();
     }
 
     public int capacita() {
@@ -60,21 +62,6 @@ public class PianoDeiCerchiNumerati {
         }
     }
 
-    public long[] daiNumeriOrdinati() {
-        long[] out = new long[size];
-        for (int i = 0; i < size; i++) {
-            out[i] = a[i].getNumero();
-            for (int j = i-1; j >= 0; j--) {
-                if (out[j] < out[j+1]) {
-                    long temp = out[j+1];
-                    out[j+1] = out[j];
-                    out[j] = temp;
-                }
-            }
-        }
-        return out;
-    }
-
     private int trovaContenitorePiuGrande(int idx) {
         CerchioNumerato target = a[idx];
         int best = -1;
@@ -100,6 +87,23 @@ public class PianoDeiCerchiNumerati {
         size--;
     }
 
+    
+
+    public long[] daiNumeriOrdinati() {
+        long[] out = new long[size];
+        for (int i = 0; i < size; i++) {
+            out[i] = a[i].getNumero();
+            for (int j = i-1; j >= 0; j--) {
+                if (out[j] < out[j+1]) {
+                    long temp = out[j+1];
+                    out[j+1] = out[j];
+                    out[j] = temp;
+                }
+            }
+        }
+        return out;
+    }
+
     public CerchioNumerato sommaCerchi() {
         if (size == 0) throw new EmptyPlaneException();
         Punto p = daiPuntoMedio();
@@ -115,13 +119,18 @@ public class PianoDeiCerchiNumerati {
         return result;
     }
 
+    // da qui in poi, metodi di supporto per sommaCerchi
+
+    private final float EPS = 1e-6f;
+    private final Punto[] directions;
+
     private float allarga(Punto p){
-        float result;
-        for(result = 1f; !contieneTutti(daiCerchio(p, result)); result*=2);
+        float result = 1f;
+        while(!contieneTutti(daiCerchio(p, result))){
+            result*=2;
+        }
         return result;
     }
-
-    public static final float EPS = 1e-6f;
 
     private float restringi(Punto p, float start){
         float max = start, min = 0, mid = start/2, champion = start;
@@ -140,7 +149,6 @@ public class PianoDeiCerchiNumerati {
 
     private Cerchio controllaTutteLeDirezioni(Punto p, float start){
         Cerchio c = daiCerchio(p, start);
-        Punto[] directions = generaDirezioni();
         for (int i = 0; i < directions.length; i++) {
             p = controllaDirezione(c, directions[i]);
             c = daiCerchio(p, restringi(p, c.getRaggio()));

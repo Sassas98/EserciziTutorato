@@ -3,6 +3,7 @@ public class Scatola {
     private int indice = 0;
 
     public Scatola(int max) {
+        if(max < 0) throw new IllegalArgumentException();
         this.scatole = new Scatola[max];
     }
 

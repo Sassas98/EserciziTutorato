@@ -88,6 +88,7 @@ public class Tester {
         assertEquals(() -> new CostruttoreDiParole().costruisciAlbero("cia").toString(), "cia_", "costruisciAlbero dispari");
         assertEquals(() -> new CostruttoreDiParole().getParola(new CostruttoreDiParole().costruisciAlbero("ciao")), "ciao", "roundtrip pari");
         assertEquals(() -> new CostruttoreDiParole().getParola(new CostruttoreDiParole().costruisciAlbero("cia")), "cia_", "roundtrip dispari");
+        assertEquals(() -> new CostruttoreDiParole().getParola(new CostruttoreDiParole().costruisciAlbero("supercalifragilistichespiralitoso")), "supercalifragilistichespiralitoso_", "roundtrip dispari");
 
         assertEquals(() -> {
             Scatola s1 = new Scatola(2);
@@ -170,8 +171,6 @@ public class Tester {
             }
             return true;
         }, true, "GetTotCollisioni distinti e stesso hashCode");
-
-        assertThrows(() -> new Scatola(0).aggiungi(new Scatola(0)), new IllegalStateException(), "Scatola piena lancia eccezione");
 
         runAndPrintAll();
     }

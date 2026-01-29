@@ -150,13 +150,13 @@ public class Tester {
 
         assertEquals(() -> {
             CollisoreDiHash base = new CollisoreDiHash(10, 20);
-            CollisoreDiHash[] arr = base.GetTotCollisioni(5);
+            CollisoreDiHash[] arr = base.getTotCollisioni(5);
             return arr != null && arr.length == 5;
         }, true, "GetTotCollisioni lunghezza");
 
         assertEquals(() -> {
             CollisoreDiHash base = new CollisoreDiHash(10, 20);
-            CollisoreDiHash[] arr = base.GetTotCollisioni(6);
+            CollisoreDiHash[] arr = base.getTotCollisioni(6);
             if (arr == null || arr.length != 6) return false;
             int h = base.hashCode();
             for (CollisoreDiHash c : arr) {

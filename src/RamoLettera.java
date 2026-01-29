@@ -14,10 +14,28 @@ public class RamoLettera implements ParteLettera {
         return sinistro.toString() + destro.toString();
     }
 
-    /*
-     TODO
-     Implementa i metodi equals e hashCode in modo che due frami siano uguali
-        se rappresentano la stessa parola.
-    */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + sinistro.hashCode();
+        result = prime * result + destro.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RamoLettera other = (RamoLettera) obj;
+        return this.destro.equals(other.destro)
+            && this.sinistro.equals(other.sinistro);
+    }
+
+    
 
 }

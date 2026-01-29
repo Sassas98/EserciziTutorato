@@ -12,6 +12,17 @@ public class Scatola {
             throw new IllegalStateException("Scatola piena");
         }
         scatole[indice++] = scatola;
+        aggiustaScatole();
+    }
+
+    private void aggiustaScatole(){
+        for (int i = indice-1; i > 0; i--) {
+            if(scatole[i].indice > scatole[i-1].indice){
+                Scatola temp = scatole[i];
+                scatole[i] = scatole[i-1];
+                scatole[i-1] = temp;
+            }
+        }
     }
 
     /**
@@ -21,8 +32,17 @@ public class Scatola {
      */
     @Override
     public boolean equals(Object obj) {
-        // TODO
-        return false;
+        if(obj == null) return false;
+        if(obj == this) return true;
+        if(!(obj instanceof Scatola other))
+            return false;
+        if(this.indice != other.indice)
+            return false;
+        for (int i = 0; i < indice; i++) {
+            if(!this.scatole[i].equals(other.scatole[i]))
+                return false;
+        }
+        return true;
     }
 
     /*
@@ -30,8 +50,12 @@ public class Scatola {
     */
     @Override
     public int hashCode() {
-        // TODO
-        return 0;
+        final int prime = 31;
+        int result = 1;
+        for (int i = 0; i < indice; i++) {
+            result = prime * result + scatole[i].hashCode();
+        }
+        return result;
     }
 
 }

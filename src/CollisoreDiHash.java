@@ -1,3 +1,7 @@
+import java.util.Collection;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
 public class CollisoreDiHash {
     private final int n1, n2;
     public CollisoreDiHash(int n1, int n2) {
@@ -36,9 +40,22 @@ public class CollisoreDiHash {
      * @param tot
      * @return
      */
-    public CollisoreDiHash[] GetTotCollisioni(int tot){
-        // TODO
-        return null;
+    public CollisoreDiHash[] getTotCollisioni(int tot) {
+        if (tot < 0) throw new IllegalArgumentException("tot deve essere >= 0");
+
+        CollisoreDiHash[] res = new CollisoreDiHash[tot];
+        int baseHash = this.hashCode();
+
+        for (int idx = 0, t = 1; idx < tot; t++) {
+            // qui si ricorre ad un po' di matematica
+            int i = n1 + t;
+            int j = n2 - 31 * t;
+            CollisoreDiHash c = new CollisoreDiHash(i, j);
+            if (c.hashCode() == baseHash) {
+                res[idx++] = c;
+            }
+        }
+        return res;
     }
     
 }

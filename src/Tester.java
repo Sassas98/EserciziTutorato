@@ -115,6 +115,111 @@ public class Tester {
         assertNotThorws(() -> l13.compact(), "compact dopo molte rimozioni non lancia eccezioni");
         int expectedAfterCompact = n - (int) Math.ceil(n / 3.0);
         assertEquals(() -> l13.size(), expectedAfterCompact, "compact dopo rimozioni -> size attesa");
+                ReportSondaggio rs = new ReportSondaggio();
+
+        assertEquals(
+            () -> rs.analizzaRisultati("Gradimento", new String[]{}),
+            "SONDAGGIO: Gradimento\n" +
+            "Risposte totali: 0\n" +
+            "Risposte valide: 0\n" +
+            "Risposte vuote/nulle: 0\n" +
+            "Opzioni distinte: 0\n\n" +
+            "Nessuna risposta valida.\n",
+            "sondaggio senza risposte"
+        );
+
+        assertNotThorws(
+            () -> rs.analizzaRisultati("Test", new String[]{null, " ", "\t"}),
+            "sondaggio con sole risposte vuote/null"
+        );
+
+        assertNotThorws(
+            () -> rs.analizzaRisultati(
+                "Colori",
+                new String[]{"Rosso", " rosso ", "ROSSO", "Blu", "blu", "Verde"}
+            ),
+            "normalizzazione case e spazi"
+        );
+
+        assertNotThorws(
+            () -> rs.analizzaRisultati(
+                "Animali",
+                new String[]{"gatto", "cane", "gatto", "cane", "gatto"}
+            ),
+            "conteggio frequenze corretto"
+        );
+
+        assertNotThorws(
+            () -> rs.analizzaRisultati(
+                "Caos",
+                new String[]{
+                    "  A  ",
+                    "A",
+                    "a",
+                    "B",
+                    "b ",
+                    null,
+                    "",
+                    "   ",
+                    "C",
+                    "c c",
+                    "c  c"
+                }
+            ),
+            "pulizia input, collasso spazi e gestione null"
+        );
+
+        assertNotThorws(
+            () -> rs.analizzaRisultati(
+                "",
+                new String[]{"uno", "due", "tre"}
+            ),
+            "titolo vuoto gestito"
+        );
+
+        CorsoIscritti c1 = new CorsoIscritti("  Java  ", 2);
+        assertEquals(() -> c1.getNomeCorso(), "Java", "nome corso trimmato");
+        assertEquals(() -> c1.getCapienza(), 2, "capienza impostata");
+        assertEquals(() -> c1.getIscritti(), 0, "iscritti iniziali = 0");
+        assertEquals(() -> c1.ePieno(), false, "non pieno all'inizio");
+        assertArrayEquals(() -> c1.elencoStudenti(), new String[]{}, "elenco iniziale vuoto");
+        assertEquals(() -> c1.getStudente(0), null, "getStudente(0) su vuoto -> null");
+        assertEquals(() -> c1.getStudente(-1), null, "getStudente(-1) -> null");
+
+        assertEquals(() -> c1.iscriviStudente("Mario Rossi"), true, "iscrizione valida -> true");
+        assertEquals(() -> c1.getIscritti(), 1, "dopo iscrizione: iscritti = 1");
+        assertEquals(() -> c1.getStudente(0), "Mario Rossi", "studente inserito recuperabile");
+        assertArrayEquals(() -> c1.elencoStudenti(), new String[]{"Mario Rossi"}, "elenco con 1 elemento");
+
+        assertEquals(() -> c1.iscriviStudente("  Lucia Bianchi  "), true, "trim su nome studente");
+        assertEquals(() -> c1.getIscritti(), 2, "dopo seconda iscrizione: iscritti = 2");
+        assertEquals(() -> c1.ePieno(), true, "pieno quando raggiunge capienza");
+        assertArrayEquals(() -> c1.elencoStudenti(), new String[]{"Mario Rossi", "Lucia Bianchi"}, "ordine preservato");
+
+        assertEquals(() -> c1.iscriviStudente("Giovanni Verdi"), false, "non permette oltre capienza");
+        assertEquals(() -> c1.getIscritti(), 2, "iscritti invariati se pieno");
+
+        assertEquals(() -> c1.iscriviStudente("Mario Rossi"), false, "non permette duplicati");
+        assertArrayEquals(() -> c1.elencoStudenti(), new String[]{"Mario Rossi", "Lucia Bianchi"}, "contenuto invariato dopo duplicato");
+
+        assertEquals(() -> c1.iscriviStudente(null), false, "non permette null");
+        assertEquals(() -> c1.iscriviStudente("   "), false, "non permette stringa vuota");
+        assertEquals(() -> c1.getStudente(2), null, "getStudente fuori range -> null");
+
+        CorsoIscritti c2 = new CorsoIscritti(null, -5);
+        assertEquals(() -> c2.getNomeCorso(), "Corso", "nome default se null/vuoto");
+        assertEquals(() -> c2.getCapienza(), 0, "capienza negativa -> 0");
+        assertEquals(() -> c2.ePieno(), true, "capienza 0 => pieno");
+        assertEquals(() -> c2.iscriviStudente("A"), false, "capienza 0: non iscrive");
+        assertArrayEquals(() -> c2.elencoStudenti(), new String[]{}, "capienza 0: elenco vuoto");
+
+        CorsoIscritti c3 = new CorsoIscritti("Test", 3);
+        c3.iscriviStudente("A");
+        c3.iscriviStudente("B");
+        String[] elenco = c3.elencoStudenti();
+        elenco[0] = "X";
+        assertEquals(() -> c3.getStudente(0), "A", "elencoStudenti restituisce copia: modifiche esterne non impattano");
+        assertArrayEquals(() -> c3.elencoStudenti(), new String[]{"A", "B"}, "contenuto invariato dopo modifica su copia");
 
         runAndPrintAll();
     }

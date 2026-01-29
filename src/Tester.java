@@ -1,12 +1,181 @@
 public class Tester {
 
     public static void main(String[] args) throws Exception {
-        assertEquals(() -> 2, 3, "errore", new String[]{"5"});
-        assertArrayEquals(() -> new Integer[]{1,2,3}, new Integer[]{1,1,3}, "test array");
-        assertThrows(() -> {}, new Exception(), "no errore");
-        assertNotThorws(() -> {throw new IllegalArgumentException();}, "errore");
+        assertEquals(() -> new FogliaLettera('a').equals(new FogliaLettera('a')), true, "FogliaLettera equals stesso char");
+        assertEquals(() -> new FogliaLettera('a').equals(new FogliaLettera('b')), false, "FogliaLettera equals char diverso");
+        assertEquals(() -> new FogliaLettera('a').equals(null), false, "FogliaLettera equals null");
+        assertEquals(() -> new FogliaLettera('a').equals("a"), false, "FogliaLettera equals tipo diverso");
+        assertEquals(() -> new FogliaLettera('x').hashCode() == new FogliaLettera('x').hashCode(), true, "FogliaLettera hashCode coerente");
+        assertEquals(() -> new FogliaLettera('x').hashCode() == new FogliaLettera('y').hashCode(), false, "FogliaLettera hashCode diverso (probabile)");
+
+        assertEquals(
+                () -> new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i'))
+                        .equals(new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i'))),
+                true,
+                "RamoLettera equals stessa parola"
+        );
+        assertEquals(
+                () -> new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i'))
+                        .equals(new RamoLettera(new FogliaLettera('c'), new FogliaLettera('a'))),
+                false,
+                "RamoLettera equals parola diversa"
+        );
+        assertEquals(
+                () -> new RamoLettera(
+                        new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')),
+                        new RamoLettera(new FogliaLettera('a'), new FogliaLettera('o'))
+                ).equals(
+                        new RamoLettera(
+                                new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')),
+                                new RamoLettera(new FogliaLettera('a'), new FogliaLettera('o'))
+                        )
+                ),
+                true,
+                "RamoLettera equals struttura annidata stessa parola"
+        );
+        assertEquals(
+                () -> new RamoLettera(
+                        new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')),
+                        new RamoLettera(new FogliaLettera('a'), new FogliaLettera('o'))
+                ).equals(
+                        new RamoLettera(
+                                new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')),
+                                new RamoLettera(new FogliaLettera('a'), new FogliaLettera('x'))
+                        )
+                ),
+                false,
+                "RamoLettera equals struttura annidata parola diversa"
+        );
+        assertEquals(
+                () -> new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')).equals(null),
+                false,
+                "RamoLettera equals null"
+        );
+        assertEquals(
+                () -> new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')).equals("ci"),
+                false,
+                "RamoLettera equals tipo diverso"
+        );
+        assertEquals(
+                () -> new RamoLettera(new FogliaLettera('z'), new FogliaLettera('z')).hashCode()
+                        == new RamoLettera(new FogliaLettera('z'), new FogliaLettera('z')).hashCode(),
+                true,
+                "RamoLettera hashCode coerente"
+        );
+
+        assertEquals(() -> new CostruttoreDiParole().getParola(null), null, "CostruttoreDiParole.getParola null");
+        assertEquals(() -> new CostruttoreDiParole().getParola(new FogliaLettera('a')), "a", "CostruttoreDiParole.getParola foglia");
+        assertEquals(
+                () -> new CostruttoreDiParole().getParola(new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i'))),
+                "ci",
+                "CostruttoreDiParole.getParola ramo semplice"
+        );
+        assertEquals(
+                () -> new CostruttoreDiParole().getParola(
+                        new RamoLettera(
+                                new RamoLettera(new FogliaLettera('c'), new FogliaLettera('i')),
+                                new RamoLettera(new FogliaLettera('a'), new FogliaLettera('o'))
+                        )
+                ),
+                "ciao",
+                "CostruttoreDiParole.getParola ramo annidato"
+        );
+
+        assertEquals(() -> new CostruttoreDiParole().costruisciAlbero(null), null, "CostruttoreDiParole.costruisciAlbero null");
+        assertEquals(() -> new CostruttoreDiParole().costruisciAlbero(""), null, "CostruttoreDiParole.costruisciAlbero vuota");
+        assertEquals(() -> new CostruttoreDiParole().costruisciAlbero("a").toString(), "a_", "costruisciAlbero dispari 1 char => underscore");
+        assertEquals(() -> new CostruttoreDiParole().costruisciAlbero("ciao").toString(), "ciao", "costruisciAlbero pari");
+        assertEquals(() -> new CostruttoreDiParole().costruisciAlbero("cia").toString(), "cia_", "costruisciAlbero dispari");
+        assertEquals(() -> new CostruttoreDiParole().getParola(new CostruttoreDiParole().costruisciAlbero("ciao")), "ciao", "roundtrip pari");
+        assertEquals(() -> new CostruttoreDiParole().getParola(new CostruttoreDiParole().costruisciAlbero("cia")), "cia_", "roundtrip dispari");
+
+        assertEquals(() -> {
+            Scatola s1 = new Scatola(2);
+            s1.aggiungi(new Scatola(0));
+            Scatola inner = new Scatola(1);
+            inner.aggiungi(new Scatola(0));
+            s1.aggiungi(inner);
+
+            Scatola s2 = new Scatola(2);
+            Scatola inner2 = new Scatola(1);
+            inner2.aggiungi(new Scatola(0));
+            s2.aggiungi(inner2);
+            s2.aggiungi(new Scatola(0));
+
+            return s1.equals(s2);
+        }, true, "Scatola equals ignorando ordine");
+
+        assertEquals(() -> {
+            Scatola s1 = new Scatola(2);
+            s1.aggiungi(new Scatola(0));
+            s1.aggiungi(new Scatola(0));
+
+            Scatola s2 = new Scatola(1);
+            s2.aggiungi(new Scatola(0));
+
+            return s1.equals(s2);
+        }, false, "Scatola equals numero diverso di contenuti");
+
+        assertEquals(() -> {
+            Scatola s1 = new Scatola(1);
+            Scatola inner = new Scatola(1);
+            inner.aggiungi(new Scatola(0));
+            s1.aggiungi(inner);
+
+            Scatola s2 = new Scatola(1);
+            s2.aggiungi(new Scatola(0));
+
+            return s1.equals(s2);
+        }, false, "Scatola equals struttura diversa");
+
+        assertEquals(() -> {
+            Scatola s1 = new Scatola(2);
+            s1.aggiungi(new Scatola(0));
+            Scatola inner = new Scatola(1);
+            inner.aggiungi(new Scatola(0));
+            s1.aggiungi(inner);
+
+            Scatola s2 = new Scatola(2);
+            Scatola inner2 = new Scatola(1);
+            inner2.aggiungi(new Scatola(0));
+            s2.aggiungi(inner2);
+            s2.aggiungi(new Scatola(0));
+
+            return s1.hashCode() == s2.hashCode();
+        }, true, "Scatola hashCode coerente con equals (caso ordine diverso)");
+
+        assertEquals(() -> new CollisoreDiHash(1, 2).equals(new CollisoreDiHash(1, 2)), true, "CollisoreDiHash equals");
+        assertEquals(() -> new CollisoreDiHash(1, 2).equals(new CollisoreDiHash(1, 3)), false, "CollisoreDiHash equals diverso");
+
+        assertEquals(() -> {
+            CollisoreDiHash base = new CollisoreDiHash(10, 20);
+            CollisoreDiHash[] arr = base.GetTotCollisioni(5);
+            return arr != null && arr.length == 5;
+        }, true, "GetTotCollisioni lunghezza");
+
+        assertEquals(() -> {
+            CollisoreDiHash base = new CollisoreDiHash(10, 20);
+            CollisoreDiHash[] arr = base.GetTotCollisioni(6);
+            if (arr == null || arr.length != 6) return false;
+            int h = base.hashCode();
+            for (CollisoreDiHash c : arr) {
+                if (c == null) return false;
+                if (c.equals(base)) return false;
+                if (c.hashCode() != h) return false;
+            }
+            for (int i = 0; i < arr.length; i++) {
+                for (int j = i + 1; j < arr.length; j++) {
+                    if (arr[i].equals(arr[j])) return false;
+                }
+            }
+            return true;
+        }, true, "GetTotCollisioni distinti e stesso hashCode");
+
+        assertThrows(() -> new Scatola(0).aggiungi(new Scatola(0)), new IllegalStateException(), "Scatola piena lancia eccezione");
+
         runAndPrintAll();
     }
+
 
     @SuppressWarnings("unused")
     private static void assertNotThorws(Runnable function, String description){

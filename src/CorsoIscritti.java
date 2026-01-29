@@ -6,9 +6,19 @@ public class CorsoIscritti {
     private int iscritti;
 
     public CorsoIscritti(String nomeCorso, int capienza) {
-        this.nomeCorso = (nomeCorso == null || nomeCorso.trim().isEmpty()) ? "Corso" : nomeCorso.trim();
-        this.capienza = capienza < 0 ? 0 : capienza;
-        this.studenti = new String[this.capienza];
+        if(nomeCorso == null)
+            this.nomeCorso = "Corso";
+        else if(nomeCorso.trim().isEmpty() == true)
+            this.nomeCorso = "Corso";
+        else this.nomeCorso = nomeCorso.trim();
+        
+        if(capienza < 0){
+            this.capienza = 0;
+        }else{
+            this.capienza = capienza;
+        }
+        String[] array = new String[this.capienza];
+        this.studenti = array;
         this.iscritti = 0;
     }
 
@@ -19,10 +29,11 @@ public class CorsoIscritti {
         if (iscritti >= capienza) return false;
 
         for (int i = 0; i < iscritti; i++) {
-            if (studenti[i].equals(n)) return false;
+            if (studenti[i].equals(n) == true) return false;
         }
-
-        studenti[iscritti++] = n;
+        int indice = iscritti;
+        studenti[indice] = n;
+        iscritti = 1 + iscritti;
         return true;
     }
 
@@ -39,16 +50,25 @@ public class CorsoIscritti {
     }
 
     public boolean ePieno() {
-        return iscritti >= capienza;
+        if(iscritti >= capienza)
+            return true;
+        else return false;
     }
 
     public String getStudente(int index) {
-        return (index < 0 || index >= iscritti) ? null : studenti[index];
+        if(index < 0) return null;
+        else if(index >= iscritti) return null;
+        else{
+            return studenti[index];
+        } 
     }
 
     public String[] elencoStudenti() {
         String[] copia = new String[iscritti];
-        for (int i = 0; i < iscritti; i++) copia[i] = studenti[i];
+        for (int i = 0; i < iscritti; i = i + 1) {
+            String tmp = studenti[i];
+            copia[i] = tmp;
+        }
         return copia;
     }
 }

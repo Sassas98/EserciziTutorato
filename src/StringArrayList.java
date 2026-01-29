@@ -14,31 +14,47 @@ public class StringArrayList {
     } 
     
     public String get(int index) { 
-        return index < 0 || index >= list.length ? null : list[index]; 
+        for (int i = 0; i < list.length; i++) {
+            if(i == index){
+                return list[index];
+            }
+        }
+        return null; 
     }
     
     public void removeAt(int index) { 
-        if (index >= 0 && index < list.length) { 
-            list[index] = null; 
-        } 
+        for (int i = 0; i < list.length; i++) {
+            if(i == index){
+                list[index] = null;
+            }
+        }
     } 
     
     public void removeFirst(String s) { 
         for (int i = 0; i < list.length; i++) { 
             if (list[i] != null && list[i].equals(s)) { 
-                list[i] = null; return; 
+                list[i] = null; 
+                return; 
             } 
         } 
     } 
     
     public int size() { 
-        return list.length; 
+        int count = 0;
+        for (int i = 0; i < list.length; i++){
+            count++;
+        }
+        return count;
     } 
     
     public String[] toArray() { 
         String[] result = new String[list.length]; 
-        for (int i = 0; i < list.length; i++) { 
-            result[i] = list[i]; 
+        for (int i = 0; i < list.length; i++) {
+            if(list[i] == null) continue;
+            result[i] = "";
+            for (int j = 0; j < list[i].length(); j++) {
+                result[i] += list[i].charAt(j);
+            }
         } 
         return result; 
     } 
@@ -54,6 +70,10 @@ public class StringArrayList {
     } 
     
     public void clear() { 
-        this.list = new String[0]; 
+        String[] nuovaLista = new String[0]; 
+        for (int i = 0; i < list.length; i++) {
+            removeAt(i);
+        }
+        this.list = nuovaLista;
     } 
 }

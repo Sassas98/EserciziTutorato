@@ -7,7 +7,6 @@ public class ReportSondaggio {
         String t = titolo.trim();
         if (t.length() == 0) t = "(sondaggio)";
 
-        // 1) Pulizia + normalizzazione (trim + minuscole + collassa spazi multipli)
         String[] pulite = new String[risposte.length];
         int vuote = 0;
         int valide = 0;
@@ -26,7 +25,6 @@ public class ReportSondaggio {
                 continue;
             }
 
-            // toLowerCase senza helper
             String low = "";
             for (int k = 0; k < r.length(); k++) {
                 char c = r.charAt(k);
@@ -34,7 +32,6 @@ public class ReportSondaggio {
                 low = low + c;
             }
 
-            // collassa spazi multipli in uno
             String norm = "";
             boolean ultimoSpazio = false;
             for (int k = 0; k < low.length(); k++) {
@@ -60,7 +57,6 @@ public class ReportSondaggio {
             }
         }
 
-        // 2) Conteggio frequenze (senza map: due array paralleli)
         String[] opzioni = new String[valide];
         int[] conteggi = new int[valide];
         int opzioniCount = 0;
@@ -85,7 +81,6 @@ public class ReportSondaggio {
             }
         }
 
-        // 3) Ordina per conteggio decrescente (selection sort, volutamente non “smart”)
         for (int i = 0; i < opzioniCount; i++) {
             int best = i;
             for (int j = i + 1; j < opzioniCount; j++) {
@@ -102,11 +97,9 @@ public class ReportSondaggio {
             }
         }
 
-        // 4) Statistiche rapide
         int max = (opzioniCount > 0) ? conteggi[0] : 0;
         int min = (opzioniCount > 0) ? conteggi[opzioniCount - 1] : 0;
 
-        // 5) Report (solo concatenazione stringhe)
         String report = "";
         report = report + "SONDAGGIO: " + t + "\n";
         report = report + "Risposte totali: " + risposte.length + "\n";
@@ -144,8 +137,6 @@ public class ReportSondaggio {
         report = report + "- Più scelta: " + (opzioniCount > 0 ? opzioni[0] : "(n/a)") + " (" + max + ")\n";
         report = report + "- Meno scelta: " + (opzioniCount > 0 ? opzioni[opzioniCount - 1] : "(n/a)") + " (" + min + ")\n";
 
-        // “Allineamento” semplice per far vedere quanto sarebbe da splittare:
-        // costruisce anche un mini-istogramma testuale
         report = report + "\n";
         report = report + "ISTOGRAMMA:\n";
         for (int i = 0; i < opzioniCount; i++) {
@@ -160,7 +151,7 @@ public class ReportSondaggio {
             while (nomeCol.length() < target) nomeCol = nomeCol + " ";
 
             String barre = "";
-            int barreN = (int) ((c * 20.0) / valide + 0.5); // max 20 blocchi
+            int barreN = (int) ((c * 20.0) / valide + 0.5);
             for (int b = 0; b < barreN; b++) barre = barre + "#";
 
             report = report + nomeCol + " | " + barre + " (" + c + ")\n";

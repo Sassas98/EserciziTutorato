@@ -1,10 +1,177 @@
 public class Tester {
 
     public static void main(String[] args) throws Exception {
-        assertEquals(() -> 2, 3, "errore", new String[]{"5"});
-        assertArrayEquals(() -> new Integer[]{1,2,3}, new Integer[]{1,1,3}, "test array");
-        assertThrows(() -> {}, new Exception(), "no errore");
-        assertNotThorws(() -> {throw new IllegalArgumentException();}, "errore");
+        assertThrows(() -> { new Prodotto(null, 1); }, new IllegalArgumentException(), "Prodotto: ID null");
+        assertThrows(() -> { new Prodotto("123", 1); }, new IllegalArgumentException(), "Prodotto: ID corto");
+        assertThrows(() -> { new Prodotto("12345678901", 1); }, new IllegalArgumentException(), "Prodotto: ID lungo");
+        assertThrows(() -> { new Prodotto("", 1); }, new IllegalArgumentException(), "Prodotto: ID vuoto");
+        assertThrows(() -> { new Prodotto("123456789", 1); }, new IllegalArgumentException(), "Prodotto: ID 9");
+        assertThrows(() -> { new Prodotto("1234567890 ", 1); }, new IllegalArgumentException(), "Prodotto: ID 11 con spazio");
+        assertThrows(() -> { new Prodotto("aaaaaaaaa", 1); }, new IllegalArgumentException(), "Prodotto: ID 9 lettere");
+        assertNotThorws(() -> { new Prodotto("1234567890", 1); }, "Prodotto: costruttore valido");
+        assertNotThorws(() -> { new Prodotto("AAAAAAAAAA", 1); }, "Prodotto: ID 10 lettere");
+        assertNotThorws(() -> { new Prodotto("          ", 1); }, "Prodotto: ID 10 spazi");
+        assertEquals(() -> new Prodotto("1234567890", 5).getID(), "1234567890", "Prodotto: getID");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", 5).getUnita(), 5, "Prodotto: getUnita positiva");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", 0).getUnita(), 0, "Prodotto: unita 0 rimane 0");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", -1).getUnita(), 0, "Prodotto: unita negativa diventa 0");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", -999).getUnita(), 0, "Prodotto: unita molto negativa diventa 0");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", 1).presente(), true, "Prodotto: presente true");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", 0).presente(), false, "Prodotto: presente false con 0");
+        assertEquals(() -> new Prodotto("ABCDEFGHIJ", -3).presente(), false, "Prodotto: presente false con negativo");
+        assertThrows(() -> { new Prodotto("ABCDEFGHIJ", 3).consuma(-1); }, new IllegalArgumentException(), "Prodotto: consuma qta negativa");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); return p.consuma(0); }, true, "Prodotto: consuma 0 true");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); p.consuma(0); return p.getUnita(); }, 3, "Prodotto: consuma 0 non cambia");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); return p.consuma(2); }, true, "Prodotto: consuma meno");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); p.consuma(2); return p.getUnita(); }, 1, "Prodotto: unita dopo consumo");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); return p.consuma(3); }, true, "Prodotto: consuma esatto");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); p.consuma(3); return p.getUnita(); }, 0, "Prodotto: unita va a 0");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); p.consuma(3); return p.presente(); }, false, "Prodotto: presente false dopo zero");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); return p.consuma(4); }, false, "Prodotto: consuma troppo false");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 3); p.consuma(4); return p.getUnita(); }, 3, "Prodotto: consuma troppo non cambia");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 1); p.consuma(1); return p.consuma(1); }, false, "Prodotto: doppio consumo oltre");
+        assertEquals(() -> { Prodotto p = new Prodotto("ABCDEFGHIJ", 1); p.consuma(1); return p.getUnita(); }, 0, "Prodotto: dopo consumo a zero rimane zero");
+
+        assertNotThorws(() -> { new Magazzino(0); }, "Magazzino: costruttore max 0");
+        assertNotThorws(() -> { new Magazzino(1); }, "Magazzino: costruttore max 1");
+        assertNotThorws(() -> { new Magazzino(10); }, "Magazzino: costruttore max 10");
+
+        assertEquals(() -> new Magazzino(1).aggiungi(null), false, "Magazzino: aggiungi null false");
+        assertEquals(() -> new Magazzino(1).aggiungi(new Prodotto("ABCDEFGHIJ", 0)), false, "Magazzino: aggiungi prodotto senza unita false");
+        assertEquals(() -> new Magazzino(1).aggiungi(new Prodotto("ABCDEFGHIJ", -3)), false, "Magazzino: aggiungi prodotto negativo (0) false");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); return m.aggiungi(new Prodotto("ABCDEFGHIJ", 1)); }, true, "Magazzino: aggiungi primo true");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 1)); return m.aggiungi(new Prodotto("KLMNOPQRST", 1)); }, false, "Magazzino: aggiungi secondo diverso senza spazio false");
+        assertEquals(() -> { Magazzino m = new Magazzino(2); m.aggiungi(new Prodotto("ABCDEFGHIJ", 1)); return m.aggiungi(new Prodotto("KLMNOPQRST", 1)); }, true, "Magazzino: aggiungi secondo diverso con spazio true");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 2)); return m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); }, true, "Magazzino: aggiungi stesso ID somma true");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 2)); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); return m.consumaUnita("ABCDEFGHIJ", 5); }, true, "Magazzino: somma e consuma tutto");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 2)); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); return m.consumaUnita("ABCDEFGHIJ", 6); }, false, "Magazzino: somma ma consumo troppo");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 2)); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); m.consumaUnita("ABCDEFGHIJ", 6); return m.consumaUnita("ABCDEFGHIJ", 5); }, true, "Magazzino: consumo troppo non cambia, poi consuma ok");
+
+        assertThrows(() -> { new Magazzino(1).consumaUnita("ABCDEFGHIJ", -1); }, new IllegalArgumentException(), "Magazzino: consumaUnita num negativo");
+        assertEquals(() -> new Magazzino(1).consumaUnita("ABCDEFGHIJ", 1), false, "Magazzino: consumaUnita su id inesistente false");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); return m.consumaUnita("KLMNOPQRST", 1); }, false, "Magazzino: consumaUnita id diverso false");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); return m.consumaUnita("ABCDEFGHIJ", 4); }, false, "Magazzino: consumaUnita oltre disponibilita false");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); m.consumaUnita("ABCDEFGHIJ", 4); return m.consumaUnita("ABCDEFGHIJ", 3); }, true, "Magazzino: consumo oltre non cambia, poi consuma tutto");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); return m.consumaUnita("ABCDEFGHIJ", 0); }, true, "Magazzino: consumaUnita 0 true");
+        assertEquals(() -> { Magazzino m = new Magazzino(1); m.aggiungi(new Prodotto("ABCDEFGHIJ", 3)); m.consumaUnita("ABCDEFGHIJ", 0); return m.consumaUnita("ABCDEFGHIJ", 3); }, true, "Magazzino: consuma 0 poi consuma tutto");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("ABCDEFGHIJ", 1));
+            m.consumaUnita("ABCDEFGHIJ", 1);
+            return m.aggiungi(new Prodotto("KLMNOPQRST", 1));
+        }, true, "Magazzino: libera spazio quando unita va a 0");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            m.aggiungi(new Prodotto("BBBBBBBBBB", 1));
+            m.consumaUnita("AAAAAAAAAA", 1);
+            return m.aggiungi(new Prodotto("CCCCCCCCCC", 1));
+        }, true, "Magazzino: elimina primo e consente nuovo inserimento");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            m.aggiungi(new Prodotto("BBBBBBBBBB", 2));
+            m.consumaUnita("BBBBBBBBBB", 2);
+            return m.aggiungi(new Prodotto("CCCCCCCCCC", 1));
+        }, true, "Magazzino: elimina secondo e consente nuovo inserimento");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            m.aggiungi(new Prodotto("BBBBBBBBBB", 1));
+            m.consumaUnita("AAAAAAAAAA", 1);
+            m.consumaUnita("BBBBBBBBBB", 1);
+            return m.aggiungi(new Prodotto("CCCCCCCCCC", 1));
+        }, true, "Magazzino: elimina entrambi e consente nuovo inserimento");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 5));
+            m.aggiungi(new Prodotto("BBBBBBBBBB", 5));
+            m.consumaUnita("AAAAAAAAAA", 3);
+            m.consumaUnita("BBBBBBBBBB", 2);
+            return m.consumaUnita("AAAAAAAAAA", 2);
+        }, true, "Magazzino: consumi multipli fino a zero");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 5));
+            m.consumaUnita("AAAAAAAAAA", 5);
+            return m.consumaUnita("AAAAAAAAAA", 1);
+        }, false, "Magazzino: dopo eliminazione id non trovato");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(3);
+            m.aggiungi(new Prodotto("1111111111", 1));
+            m.aggiungi(new Prodotto("2222222222", 2));
+            m.aggiungi(new Prodotto("3333333333", 3));
+            m.consumaUnita("2222222222", 2);
+            return m.aggiungi(new Prodotto("4444444444", 4));
+        }, true, "Magazzino: elimina in mezzo e shift corretto");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(3);
+            m.aggiungi(new Prodotto("1111111111", 1));
+            m.aggiungi(new Prodotto("2222222222", 2));
+            m.aggiungi(new Prodotto("3333333333", 3));
+            m.consumaUnita("2222222222", 2);
+            return m.consumaUnita("3333333333", 3);
+        }, true, "Magazzino: dopo shift, ultimo ancora accessibile");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(3);
+            m.aggiungi(new Prodotto("1111111111", 1));
+            m.aggiungi(new Prodotto("2222222222", 2));
+            m.aggiungi(new Prodotto("3333333333", 3));
+            m.consumaUnita("2222222222", 2);
+            return m.consumaUnita("1111111111", 1);
+        }, true, "Magazzino: dopo shift, primo ancora accessibile");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("ZZZZZZZZZZ", 10));
+            m.aggiungi(new Prodotto("ZZZZZZZZZZ", 1));
+            return m.consumaUnita("ZZZZZZZZZZ", 11);
+        }, true, "Magazzino: somma su ID uguale e consuma totale");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("ZZZZZZZZZZ", 10));
+            m.aggiungi(new Prodotto("ZZZZZZZZZZ", 1));
+            m.consumaUnita("ZZZZZZZZZZ", 11);
+            return m.aggiungi(new Prodotto("YYYYYYYYYY", 1));
+        }, true, "Magazzino: dopo consumo totale libera slot per nuovo");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(2);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            return m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+        }, true, "Magazzino: aggiungi stesso ID con spazio comunque true");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            return m.aggiungi(new Prodotto("AAAAAAAAAA", 2));
+        }, true, "Magazzino: aggiungi stesso ID senza spazio (non serve spazio)");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 2));
+            return m.consumaUnita("AAAAAAAAAA", 2);
+        }, true, "Magazzino: somma e consumo parziale");
+
+        assertEquals(() -> {
+            Magazzino m = new Magazzino(1);
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 1));
+            m.aggiungi(new Prodotto("AAAAAAAAAA", 2));
+            m.consumaUnita("AAAAAAAAAA", 2);
+            return m.consumaUnita("AAAAAAAAAA", 2);
+        }, false, "Magazzino: dopo consumo parziale non abbastanza");
+
         runAndPrintAll();
     }
 

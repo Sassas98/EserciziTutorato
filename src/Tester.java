@@ -40,8 +40,20 @@ public class Tester {
         testList.add(new Tester(description, function, input, output));
     }
 
+    private final static int REPEATS = 4;
+
     private static void runAndPrintAll(){
-        Tester.printResults(testList.stream().map(x -> x.run()).toList());
+        Tester.printResults(testList.stream().map(x -> {
+            TestResult result = x.run();
+            long time = result.time/REPEATS;
+            long memory = result.memory/REPEATS;
+            for (int i = 1; i < REPEATS; i++) {
+                result = x.run();
+                time += result.time/REPEATS;
+                memory += result.memory/REPEATS;
+            }
+            return new TestResult(result.type(), result.message(), memory, time);
+        }).toList());
     }
 
     private static java.util.List<Tester> testList = new java.util.ArrayList<>();
@@ -89,11 +101,18 @@ public class Tester {
     }
 
     public TestResult runArray() {
+        long startTime = System.nanoTime();
         try {
             Object[] out = functionArray.get();
-            return outputArray == out || java.util.Arrays.deepEquals(out, outputArray) ? success() : failure(formatCall() + formatArray(out) + " != " + formatArray(outputArray));
+            Runtime rt = Runtime.getRuntime();
+            long memory = rt.totalMemory() - rt.freeMemory();
+            long time = System.nanoTime() - startTime;
+            return outputArray == out || java.util.Arrays.deepEquals(out, outputArray) ? success(memory, time) : failure(formatCall() + formatArray(out) + " != " + formatArray(outputArray), memory, time);
         } catch (Exception e) {
-            return error(e);
+            Runtime rt = Runtime.getRuntime();
+            long memory = rt.totalMemory() - rt.freeMemory();
+            long time = System.nanoTime() - startTime;
+            return error(e, memory, time);
         }
     }
 
@@ -102,25 +121,32 @@ public class Tester {
     }
 
     public TestResult runSingle() {
+        long startTime = System.nanoTime();
         try {
             Object out = function.get();
+            Runtime rt = Runtime.getRuntime();
+            long memory = rt.totalMemory() - rt.freeMemory();
+            long time = System.nanoTime() - startTime;
             if (isExpectingException()) {
-                return failure(description + ": Nessuna eccezione lanciata");
+                return failure(description + ": Nessuna eccezione lanciata", memory, time);
             }
-            return output == out || java.util.Objects.equals(output, out) ? success() : failure(formatCall() + out + " != " + output);
+            return output == out || java.util.Objects.equals(output, out) ? success(memory, time) : failure(formatCall() + out + " != " + output, memory, time);
         } catch (Exception e) {
-            return handleException(e);
+            Runtime rt = Runtime.getRuntime();
+            long memory = rt.totalMemory() - rt.freeMemory();
+            long time = System.nanoTime() - startTime;
+            return handleException(e, memory, time);
         }
     }
 
-    private TestResult handleException(Exception e){
-        if (!(output instanceof Throwable t)) return error(e);
+    private TestResult handleException(Exception e, long memory, long time) {
+        if (!(output instanceof Throwable t)) return error(e, memory, time);
         Class<?> expected = t.getClass();
         return expected.isInstance(e)
-            ? success()
+            ? success(memory, time)
             : failure(description + ": Eccezione diversa: attesa "
                 + expected.getName() + " ma ottenuta " + e.getClass().getName()
-                + " (" + e.getMessage() + ")");
+                + " (" + e.getMessage() + ")", memory, time);
     }
 
     private boolean isExpectingException() {
@@ -137,16 +163,16 @@ public class Tester {
         return sb.toString();
     }
 
-    private TestResult success() {
-        return new TestResult(TestResultType.SUCCESS, null);
+    private TestResult success(long memory, long time) {
+        return new TestResult(TestResultType.SUCCESS, null, memory, time);
     }
 
-    private TestResult failure(String msg) {
-        return new TestResult(TestResultType.FAILURE, msg);
+    private TestResult failure(String msg, long memory, long time) {
+        return new TestResult(TestResultType.FAILURE, msg, memory, time);
     }
 
-    private TestResult error(Exception e) {
-        return new TestResult(TestResultType.ERROR, description + ": [" + e.getClass().getName() + "] " + e.getMessage());
+    private TestResult error(Exception e, long memory, long time) {
+        return new TestResult(TestResultType.ERROR, description + ": [" + e.getClass().getName() + "] " + e.getMessage(), memory, time);
     }
 
     public static void printResults(java.util.List<TestResult> results){
@@ -154,7 +180,10 @@ public class Tester {
         int successes = (int)results.stream().filter(x -> x.type() == TestResultType.SUCCESS).count();
         int failures = (int)results.stream().filter(x -> x.type() == TestResultType.FAILURE).count();
         int errors = (int)results.stream().filter(x -> x.type() == TestResultType.ERROR).count();
+        long maxMemory = results.stream().mapToLong(TestResult::memory).max().orElse(0L);
         System.out.println("Test superati [" + successes + "/" + tot + "]");
+        System.out.println("Picco memoria [" + results.stream().map(x -> x.memory).reduce(0L, (x, y) -> x > y ? x : y) + "]");
+        System.out.println("Tempo esecuzione [" + results.stream().map(x -> x.time).reduce(0L, (x, y) -> x + y) + "]");
         if(failures > 0){
             System.out.println("Fallimenti: " + failures);
             for(TestResult tr : results){
@@ -171,7 +200,7 @@ public class Tester {
         }
     }
 
-    private record TestResult(TestResultType type, String message) { }
+    private record TestResult(TestResultType type, String message, long memory, long time) { }
 
     private enum TestResultType {
         SUCCESS,
